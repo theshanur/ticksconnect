@@ -129,15 +129,11 @@ export function HeroSection() {
                 transition={{ duration: 0.65, delay: 0.2, ease: "easeOut" }}
                 className="overflow-hidden rounded-t-2xl border border-b-0 border-border bg-card/55 shadow-xl shadow-background/50 backdrop-blur-md">
                 <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-                  <span className="size-2.5 rounded-full bg-foreground/20" />
-                  <span className="size-2.5 rounded-full bg-foreground/20" />
-                  <span className="size-2.5 rounded-full bg-foreground/20" />
+                  <span className="size-2.5 rounded-full bg-green-500/50" />
+                  <span className="size-2.5 rounded-full bg-red-500/50" />
+                  <span className="size-2.5 rounded-full bg-yellow-500/50" />
                   <span className="ml-3 font-mono text-[11px] tracking-wide text-muted-foreground">
                     your accounts
-                  </span>
-                  <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-buy/15 px-2 py-0.5 text-[11px] font-medium text-buy">
-                    <span className="size-1.5 animate-pulse rounded-full bg-buy" />
-                    Live
                   </span>
                 </div>
 
