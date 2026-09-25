@@ -216,7 +216,7 @@ export default function TradeCopierSection() {
                 whileTap={{
                   scale: 0.9,
                 }}
-                className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-violet-400/40 bg-violet-500/[0.10] shadow-[0_0_30px_rgba(139,92,246,.12)]">
+                className="flex h-[52px] w-[52px] flex-none items-center justify-center rounded-full border border-violet-400/40 bg-violet-500/[0.10] shadow-[0_0_30px_rgba(139,92,246,.12)]">
                 <motion.div
                   animate={{ rotate: reversed ? 180 : 0 }}
                   transition={{
@@ -233,10 +233,10 @@ export default function TradeCopierSection() {
                 animate={{
                   scale: reversed ? 1.03 : 1,
                 }}
-                className={`flex h-[88px] w-[119px] items-center justify-center rounded-xl border transition-all duration-300 ${
+                className={`flex h-22 w-29.75 items-center justify-center rounded-xl border transition-all duration-300 ${
                   reversed
-                    ? "border-emerald-500/35 bg-emerald-500/[0.06]"
-                    : "border-emerald-500/35 bg-emerald-500/[0.06]"
+                    ? "border-emerald-500/35 bg-emerald-500/6"
+                    : "border-emerald-500/35 bg-emerald-500/6"
                 }`}>
                 <div className="text-center">
                   <div className="text-[18px] font-semibold text-emerald-400">
