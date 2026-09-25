@@ -152,6 +152,22 @@
     var(--background);
 }
 
+.pricing-backdrop__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      70% 50% at 70% 20%,
+      color-mix(in oklch, var(--primary) 12%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--background) 35%, transparent),
+      transparent 40%,
+      var(--background) 100%
+    );
+}
 .hero-backdrop__veil {
   position: absolute;
   inset: 0;

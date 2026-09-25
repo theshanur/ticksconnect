@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -77,8 +77,16 @@ export function PricingSection() {
   const [billing, setBilling] = useState<Billing>("monthly");
 
   return (
-    <section id="pricing" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-24">
-      <div className="mx-auto max-w-6xl">
+    <section
+      id="pricing"
+      className="relative scroll-mt-24 overflow-hidden px-4 py-16 sm:px-6 sm:py-24">
+      <div className="hero-backdrop" aria-hidden="true">
+        <div className="hero-backdrop__veil" />
+        <div className="hero-backdrop__veil" />
+        <div className="hero-backdrop__fade" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -88,10 +96,10 @@ export function PricingSection() {
           <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
             Pricing
           </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl md:text-4xl">
             Pick a Plan. Connect your accounts.
           </h2>
-          <p className="mt-4 text-base text-muted-foreground sm:text-lg">
+          <p className="mt-4 text-sm text-muted-foreground sm:text-base">
             Monthly or yearly. Connect another account when you need one more.
           </p>
         </motion.div>
@@ -102,7 +110,7 @@ export function PricingSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.4, delay: 0.08 }}
           className="mt-8 flex justify-center">
-          <div className="inline-flex rounded-full border border-foreground/10 bg-muted/30 p-1">
+          <div className="inline-flex rounded-full border border-foreground/10 bg-muted/30 p-1 backdrop-blur-sm">
             {(["monthly", "yearly"] as const).map(option => (
               <button
                 key={option}
@@ -136,30 +144,28 @@ export function PricingSection() {
                   ease: "easeOut",
                 }}
                 className={cn(
-                  "flex flex-col rounded-2xl border p-6",
+                  "flex flex-col rounded-2xl border p-6 backdrop-blur-sm relative",
                   plan.highlighted
                     ? "border-primary/40 bg-primary/5 shadow-[0_0_0_1px_color-mix(in_oklch,var(--primary)_20%,transparent)]"
-                    : "border-foreground/10 bg-card",
+                    : "border-foreground/10 bg-card/70",
                 )}>
+                {plan.description && (
+                  <div>
+                    <div className=".pricing-backdrop__veil" />
+                  </div>
+                )}
+                {plan.highlighted ? (
+                  <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-white absolute -top-2.5 left-1/2 -translate-x-1/2">
+                    Recommended
+                  </span>
+                ) : null}
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="text-lg font-semibold tracking-tight text-foreground">
                     {plan.name}
                   </h3>
-                  {plan.highlighted ? (
-                    <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary">
-                      Popular
-                    </span>
-                  ) : null}
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {plan.description}
-                </p>
 
                 <div className="mt-6 flex items-end gap-1">
-                  {/* <AnimatedPrice
-                    value={price}
-                    className="text-4xl font-semibold tracking-tight text-foreground"
-                  /> */}
                   <NumberTicker
                     value={price}
                     prefix="$"
@@ -176,33 +182,13 @@ export function PricingSection() {
                     {billing === "yearly" ? "/ year" : "/ month"}
                   </motion.span>
                 </div>
-                <motion.p
-                  key={billing}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: billing === "yearly" ? 1 : 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="mt-1 text-xs text-muted-foreground">
-                  Billed yearly
-                </motion.p>
-
-                <Button
-                  className="mt-6 w-full"
-                  variant={plan.highlighted ? "default" : "secondary"}
-                  size="lg"
-                  nativeButton={false}
-                  render={
-                    <a href="https://app.ticksconnect.com/signup" />
-                  }
-                >
-                  Get started
-                </Button>
 
                 <ul className="mt-6 flex flex-col gap-2.5">
                   {plan.features.map(feature => (
                     <li
                       key={feature}
-                      className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <Check
+                      className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <CheckCircle2
                         className="mt-0.5 size-4 shrink-0 text-primary"
                         aria-hidden
                       />
@@ -210,6 +196,16 @@ export function PricingSection() {
                     </li>
                   ))}
                 </ul>
+                <div className="mt-auto pt-6">
+                  <Button
+                    className=" w-full "
+                    variant={plan.highlighted ? "default" : "secondary"}
+                    size="lg"
+                    nativeButton={false}
+                    render={<a href="https://app.ticksconnect.com/signup" />}>
+                    Get started
+                  </Button>
+                </div>
               </motion.div>
             );
           })}
@@ -220,7 +216,7 @@ export function PricingSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.45, delay: 0.15, ease: "easeOut" }}
-          className="mt-4 flex flex-col gap-4 rounded-2xl border border-foreground/10 bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
+          className="mt-4 flex flex-col gap-4 rounded-2xl border border-foreground/10 bg-card/70 p-6 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-lg font-semibold tracking-tight text-foreground">
               Connect another account
@@ -232,14 +228,6 @@ export function PricingSection() {
           </div>
           <div className="flex shrink-0 items-end gap-1 sm:flex-col sm:items-end">
             <div className="flex items-end gap-1">
-              {/* <AnimatedPrice
-                value={
-                  billing === "monthly"
-                    ? extraAccount.monthly
-                    : extraAccount.yearly
-                }
-                className="text-3xl font-semibold tracking-tight text-foreground"
-              /> */}
               <NumberTicker
                 value={
                   billing === "monthly"
@@ -260,14 +248,14 @@ export function PricingSection() {
                 {billing === "yearly" ? "/ year" : "/ month"}
               </motion.span>
             </div>
-            <motion.span
-              key={`extra-label-${billing}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: billing === "yearly" ? 1 : 0 }}
-              transition={{ duration: 0.25 }}
-              className="text-xs text-muted-foreground">
-              Billed yearly
-            </motion.span>
+            <Button
+              className=" w-full "
+              variant={"default"}
+              size="lg"
+              nativeButton={false}
+              render={<a href="https://app.ticksconnect.com/signup" />}>
+              Get started
+            </Button>
           </div>
         </motion.div>
       </div>
