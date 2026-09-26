@@ -1,10 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type FeatureId = "quotes" | "stream" | "candles" | "events";
+
+const AUTO_ROTATE_MS = 4500;
 
 const features: {
   id: FeatureId;
@@ -86,7 +88,7 @@ function PanelChrome({ children }: { children: React.ReactNode }) {
           Live
         </span>
       </div>
-      <div className="min-h-[280px] sm:min-h-[320px]">{children}</div>
+      <div className="min-h-70 sm:min-h-80">{children}</div>
     </div>
   );
 }
@@ -94,7 +96,7 @@ function PanelChrome({ children }: { children: React.ReactNode }) {
 function QuotesPanel() {
   return (
     <div className="grid h-full grid-cols-2 divide-x divide-y divide-foreground/10">
-      {quotes.map((q) => {
+      {quotes.map(q => {
         const up = q.change >= 0;
         const priceLabel =
           q.price < 10
@@ -106,8 +108,7 @@ function QuotesPanel() {
         return (
           <div
             key={q.symbol}
-            className="flex flex-col justify-between p-5 sm:p-6"
-          >
+            className="flex flex-col justify-between p-5 sm:p-6">
             <p className="text-[11px] font-medium tracking-[0.12em] text-muted-foreground uppercase">
               {q.symbol}
             </p>
@@ -118,9 +119,8 @@ function QuotesPanel() {
               <p
                 className={cn(
                   "mt-1 font-mono text-sm tabular-nums",
-                  up ? "text-buy" : "text-sell"
-                )}
-              >
+                  up ? "text-buy" : "text-sell",
+                )}>
                 {up ? "+" : ""}
                 {q.change.toFixed(2)}%
               </p>
@@ -147,8 +147,7 @@ function StreamPanel() {
           initial={{ opacity: 0, x: -6 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: i * 0.05 }}
-          className="grid grid-cols-[1fr_1fr_1fr_auto] gap-3 bg-card px-4 py-3 text-sm"
-        >
+          className="grid grid-cols-[1fr_1fr_1fr_auto] gap-3 bg-card px-4 py-3 text-sm">
           <span className="font-medium tracking-tight">{tick.symbol}</span>
           <span className="font-mono tabular-nums text-buy">{tick.bid}</span>
           <span className="font-mono tabular-nums text-sell">{tick.ask}</span>
@@ -174,8 +173,7 @@ function CandlesPanel() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="grid grid-cols-[3rem_1fr_1fr_1fr_1fr] items-center gap-2 rounded-lg bg-muted/40 px-3 py-2.5 font-mono text-xs tabular-nums ring-1 ring-foreground/5"
-          >
+            className="grid grid-cols-[3rem_1fr_1fr_1fr_1fr] items-center gap-2 rounded-lg bg-muted/40 px-3 py-2.5 font-mono text-xs tabular-nums ring-1 ring-foreground/5">
             <span className="font-sans text-[11px] font-semibold tracking-wide text-primary uppercase">
               {c.tf}
             </span>
@@ -203,8 +201,7 @@ function EventsPanel() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="flex items-start gap-3 rounded-lg bg-muted/40 px-3 py-2.5 ring-1 ring-foreground/5"
-          >
+            className="flex items-start gap-3 rounded-lg bg-muted/40 px-3 py-2.5 ring-1 ring-foreground/5">
             <span className="mt-0.5 shrink-0 font-mono text-[11px] text-muted-foreground">
               {e.when}
             </span>
@@ -220,9 +217,8 @@ function EventsPanel() {
                   ? "bg-sell/15 text-sell"
                   : e.impact === "Med"
                     ? "bg-primary/15 text-primary"
-                    : "bg-muted text-muted-foreground"
-              )}
-            >
+                    : "bg-muted text-muted-foreground",
+              )}>
               {e.impact}
             </span>
           </motion.li>
@@ -240,8 +236,7 @@ function FeaturePanel({ active }: { active: FeatureId }) {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
-        transition={{ duration: 0.28, ease: "easeOut" }}
-      >
+        transition={{ duration: 0.28, ease: "easeOut" }}>
         {active === "quotes" ? <QuotesPanel /> : null}
         {active === "stream" ? <StreamPanel /> : null}
         {active === "candles" ? <CandlesPanel /> : null}
@@ -253,22 +248,40 @@ function FeaturePanel({ active }: { active: FeatureId }) {
 
 export function MarketDataSection() {
   const [active, setActive] = useState<FeatureId>("quotes");
+  const [rotationKey, setRotationKey] = useState(0);
+
+  const selectFeature = useCallback((id: FeatureId) => {
+    setActive(id);
+    // Restart auto-rotate countdown after a manual pick
+    setRotationKey(key => key + 1);
+  }, []);
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (prefersReducedMotion) return;
+
+    const id = window.setInterval(() => {
+      setActive(current => {
+        const index = features.findIndex(f => f.id === current);
+        const next = features[(index + 1) % features.length];
+        return next.id;
+      });
+    }, AUTO_ROTATE_MS);
+
+    return () => window.clearInterval(id);
+  }, [rotationKey]);
 
   return (
     <section className="relative overflow-hidden px-4 py-16 sm:px-6 sm:py-24">
-      <div className="hero-backdrop" aria-hidden="true">
-        <div className="hero-backdrop__veil" />
-        <div className="hero-backdrop__fade" />
-      </div>
-
       <div className="relative z-10 mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="max-w-2xl"
-        >
+          className="max-w-2xl">
           <p className="text-[11px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
             Market Data API
           </p>
@@ -286,8 +299,7 @@ export function MarketDataSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.5, delay: 0.08 }}
-          >
+            transition={{ duration: 0.5, delay: 0.08 }}>
             <PanelChrome>
               <FeaturePanel active={active} />
             </PanelChrome>
@@ -298,28 +310,26 @@ export function MarketDataSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.5, delay: 0.14 }}
-            className="flex flex-col gap-2.5"
-          >
-            {features.map((feature) => {
+            className="flex flex-col gap-2.5">
+            {features.map(feature => {
               const isActive = active === feature.id;
               return (
                 <button
                   key={feature.id}
                   type="button"
-                  onClick={() => setActive(feature.id)}
+                  onClick={() => selectFeature(feature.id)}
+                  aria-pressed={isActive}
                   className={cn(
                     "rounded-2xl border px-5 py-4 text-left transition-all duration-300",
                     isActive
                       ? "border-primary bg-primary text-primary-foreground shadow-[0_0_32px_color-mix(in_oklch,var(--primary)_30%,transparent)]"
-                      : "border-foreground/10 bg-card/50 text-foreground hover:border-foreground/20 hover:bg-card/80"
-                  )}
-                >
+                      : "border-foreground/10 bg-card/50 text-foreground hover:border-foreground/20 hover:bg-card/80",
+                  )}>
                   <p
                     className={cn(
                       "text-base font-semibold tracking-tight",
-                      isActive ? "text-primary-foreground" : "text-foreground"
-                    )}
-                  >
+                      isActive ? "text-primary-foreground" : "text-foreground",
+                    )}>
                     {feature.title}
                   </p>
                   <p
@@ -327,9 +337,8 @@ export function MarketDataSection() {
                       "mt-1 text-sm leading-relaxed",
                       isActive
                         ? "text-primary-foreground/80"
-                        : "text-muted-foreground"
-                    )}
-                  >
+                        : "text-muted-foreground",
+                    )}>
                     {feature.description}
                   </p>
                 </button>
