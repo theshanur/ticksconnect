@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 type FeatureId = "quotes" | "stream" | "candles" | "events";
 
 const AUTO_ROTATE_MS = 4500;
+/** Set true to resume tab auto-cycle */
+const AUTO_ROTATE_ENABLED = true;
 
 const features: {
   id: FeatureId;
@@ -75,7 +77,7 @@ const events = [
 
 function PanelChrome({ children }: { children: React.ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-foreground/10 bg-card/80 shadow-xl shadow-background/40 backdrop-blur-md">
+    <div className="overflow-hidden rounded-2xl border border-foreground/10 bg-card/80 shadow-xl shadow-background/40 backdrop-blur-md h-full">
       <div className="flex items-center gap-2 border-b border-foreground/10 px-4 py-3">
         <span className="size-2.5 rounded-full bg-foreground/20" />
         <span className="size-2.5 rounded-full bg-foreground/20" />
@@ -252,11 +254,14 @@ export function MarketDataSection() {
 
   const selectFeature = useCallback((id: FeatureId) => {
     setActive(id);
-    // Restart auto-rotate countdown after a manual pick
-    setRotationKey(key => key + 1);
+    if (AUTO_ROTATE_ENABLED) {
+      setRotationKey(key => key + 1);
+    }
   }, []);
 
   useEffect(() => {
+    if (!AUTO_ROTATE_ENABLED) return;
+
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -320,27 +325,34 @@ export function MarketDataSection() {
                   onClick={() => selectFeature(feature.id)}
                   aria-pressed={isActive}
                   className={cn(
-                    "rounded-2xl border px-5 py-4 text-left transition-all duration-300",
+                    "rounded-2xl border px-5 py-4 text-left transition-all duration-300 relative overflow-hidden",
                     isActive
-                      ? "border-primary bg-primary text-primary-foreground shadow-[0_0_32px_color-mix(in_oklch,var(--primary)_30%,transparent)]"
+                      ? "border-primary bg-linear-to-tl from-[#0f4231] to-[#258967] text-primary-foreground shadow-[0_0_32px_color-mix(in_oklch,var(--primary)_30%,transparent)]"
                       : "border-foreground/10 bg-card/50 text-foreground hover:border-foreground/20 hover:bg-card/80",
                   )}>
-                  <p
-                    className={cn(
-                      "text-base font-semibold tracking-tight",
-                      isActive ? "text-primary-foreground" : "text-foreground",
-                    )}>
-                    {feature.title}
-                  </p>
-                  <p
-                    className={cn(
-                      "mt-1 text-sm leading-relaxed",
-                      isActive
-                        ? "text-primary-foreground/80"
-                        : "text-muted-foreground",
-                    )}>
-                    {feature.description}
-                  </p>
+                  {isActive && (
+                    <div className="absolute z-0 -top-20 right-10 w-5 rotate-45 blur-xl h-60 bg-[#0f4231]"></div>
+                  )}
+                  <div className="relative z-10">
+                    <p
+                      className={cn(
+                        "text-base font-semibold tracking-tight",
+                        isActive
+                          ? "text-primary-foreground"
+                          : "text-foreground",
+                      )}>
+                      {feature.title}
+                    </p>
+                    <p
+                      className={cn(
+                        "mt-1 text-sm leading-relaxed",
+                        isActive
+                          ? "text-primary-foreground/80"
+                          : "text-muted-foreground",
+                      )}>
+                      {feature.description}
+                    </p>
+                  </div>
                 </button>
               );
             })}
